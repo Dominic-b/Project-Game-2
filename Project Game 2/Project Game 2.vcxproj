@@ -69,7 +69,10 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>C:\Users\dbert\source\repos\Project Game 2\Project Game 2\SDL Things\SDL2-2.0.8-win32-x64;C:\Users\dbert\source\repos\Project Game 2\Project Game 2\SDL Things\SDL2_image-2.0.3-win32-x86;C:\Users\dbert\source\repos\Project Game 2\Project Game 2\SDL Things\SDL2_ttf-2.0.15-win32-x86;C:\Users\dbert\source\repos\Project Game 2\Project Game 2\SDL Things\SDL .h Files;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\dbert\source\repos\Project Game 2\Project Game 2\SDL Things\SDL2-devel-2.0.8-VC\SDL2-2.0.8\lib\x86;C:\Users\dbert\source\repos\Project Game 2\Project Game 2\SDL Things\SDL2_image-devel-2.0.3-VC\SDL2_image-2.0.3\lib\x86;C:\Users\dbert\source\repos\Project Game 2\Project Game 2\SDL Things\SDL2_ttf-devel-2.0.15-VC\SDL2_ttf-2.0.15\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -77,6 +80,10 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -115,6 +122,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\collision.h" />
+    <ClInclude Include="..\event.h" />
+    <ClInclude Include="..\menu.h" />
+    <ClInclude Include="..\objects.h" />
+    <ClInclude Include="..\render.h" />
+    <ClInclude Include="..\stdafx.h" />
+    <ClInclude Include="..\timer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\collision.cpp" />
+    <ClCompile Include="..\event.cpp" />
+    <ClCompile Include="..\main.cpp" />
+    <ClCompile Include="..\menu.cpp" />
+    <ClCompile Include="..\objects.cpp" />
+    <ClCompile Include="..\render.cpp" />
+    <ClCompile Include="..\stdafx.cpp" />
+    <ClCompile Include="..\timer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
