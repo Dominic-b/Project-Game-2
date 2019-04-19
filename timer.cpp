@@ -6,6 +6,12 @@ double Timer::checkTime() {
 	return time_span.count();
 }
 
+void Timer::seedRand() {
+	time2 = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(time2 - time1);
+	srand((time_span.count() * 999999));
+}
+
 void Timer::checkDeltaTime() {
 	deltaTime = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - time3).count();
 	time3 = std::chrono::high_resolution_clock::now();

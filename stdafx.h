@@ -12,6 +12,7 @@
 #include "menu.h"
 static Menu menu;
 #include "objects.h"
+#include "player.h"
 #include "collision.h"
 static Collision collision;
 #include "timer.h"

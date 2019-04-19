@@ -14,10 +14,18 @@ public:
 	Point();
 };
 
+class Camera {
+public:
+	Point pos;//location
+	int w, h;//width and height of screen
+	SDL_Rect screen;
+};
+
 class Node {
 	Point pos;//location
 	double velX, velY;//velocities
 	double mass;//its mass
+	int radius;//size
 public:
 	Point getPos();
 	void setPos(Point newPos);
@@ -28,6 +36,9 @@ public:
 	void applyForceY(double forceY);
 	void update(double deltaTime);
 	void levelCollision(SDL_Rect level);//keeps the node inside the level boundaries
+	void lineCollision(double x1, double y1, double x2, double y2);
+
+	void draw(SDL_Renderer* renderer, SDL_Rect screen);
 
 	Node();
 };
@@ -43,6 +54,7 @@ public:
 	void draw(SDL_Renderer* renderer, SDL_Rect screen);
 
 	Line();
+	Line(double x1, double y1, double x2, double y2);
 };
 
 class Spring {
@@ -73,15 +85,17 @@ class RigidBody {
 };
 
 class SoftBody {
-	std::vector<Spring> springs;
 	double density;//how many point there are in a given area; wont affect anything after the object is made
-	std::vector<Node> nodes;
 	double flexibility;
 public:
+	std::vector<Node> nodes;
+	std::vector<Spring> springs;
+
 	void fill();//fill it with random points based on the density, then create springs
 	void drag(Point mPos);//drag it around with the mouse
 	void update(double deltaTime, SDL_Rect level);
 	void draw(SDL_Renderer* renderer, SDL_Rect screen);
 
 	SoftBody(std::vector<Node> newNodes);
+	SoftBody();
 };

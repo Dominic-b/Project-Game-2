@@ -14,6 +14,7 @@ public:
 
 
 	double checkTime();
+	void seedRand();
 	void checkDeltaTime();
 	void reset();
 	Timer();
