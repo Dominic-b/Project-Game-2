@@ -17,6 +17,36 @@ Point::Point() {
 	x = 0;
 	y = 0;
 }
+Point::Point(double newX, double newY) {
+	x = newX;
+	y = newY;
+}
+
+//Line class
+Point Line::getp1() {
+	return p1;
+}
+Point Line::getp2() {
+	return p2;
+}
+void Line::setp1(Point newPoint) {
+	p1 = newPoint;
+}
+void Line::setp2(Point newPoint) {
+	p2 = newPoint;
+}
+Line::Line() {
+	p1.setX(0);
+	p1.setY(0);
+	p2.setX(0);
+	p2.setY(0);
+}
+Line::Line(int x1, int y1, int x2, int y2) {
+	p1.setX(x1);
+	p1.setY(y1);
+	p2.setX(x2);
+	p2.setY(y2);
+}
 
 //Node class
 Point Node::getPos() {
@@ -43,43 +73,23 @@ void Node::update(double deltaTime) {
 	pos.setX(pos.getX() + velX * deltaTime);
 	pos.setY(pos.getY() + velY * deltaTime);
 }
-void Node::levelCollision(SDL_Rect level) {
-	if (getPos().getX() + radius > level.w) { 
-		pos.setX(level.w - radius); 
-		velX = 0;
-		velY *= .95;
-	} else if (getPos().getX() - radius < 0) {
-		pos.setX(0 + radius);
-		velX = 0;
-		velY *= .95;
-	} if (getPos().getY() + radius > level.h) {
-		pos.setY(level.h - radius);
-		velY = 0;
-		velX *= .95;
-	} else if (getPos().getY() - radius < 0) {
-		pos.setY(0 + radius);
-		velY = 0;
-		velX *= .95;
-	}
-}
-void Node::lineCollision(double x1, double y1, double x2, double y2) {
-	if (collision.circleVsLine(pos, radius, x1, y1, x2, y2)) {
-		float distX = x1 - x2;
-		float distY = y1 - y2;
-		float len = sqrt((distX*distX) + (distY*distY));
+void Node::lineCollision(Line line) {
+	if (collision.circleVsLine(pos, radius, line.getp1().getX(), line.getp1().getY(), line.getp2().getX(), line.getp2().getY())) {
+		float distX = line.getp1().getX() - line.getp2().getX();
+		float distY = line.getp1().getY() - line.getp2().getY();
 
-		float dot = (((pos.getX() - x1)*(x2 - x1)) + ((pos.getY() - y1)*(y2 - y1))) / pow(len, 2);
+		float dot = (((pos.getX() - line.getp1().getX())*(line.getp2().getX() - line.getp1().getX())) + ((pos.getY() - line.getp1().getY())*(line.getp2().getY() - line.getp1().getY()))) / pow(sqrt((distX*distX) + (distY*distY)), 2);
 
-		float closestX = x1 + (dot * (x2 - x1));
-		float closestY = y1 + (dot * (y2 - y1));
+		float closestX = line.getp1().getX() + (dot * (line.getp2().getX() - line.getp1().getX()));
+		float closestY = line.getp1().getY() + (dot * (line.getp2().getY() - line.getp1().getY()));
 
-		float angle = abs(atan2(y2 - y1, x2 - x1));
+		double angle = -atan2(line.getp2().getY() - line.getp1().getY(), line.getp2().getX() - line.getp1().getX());
 
 		pos.setX(closestX - (sin(angle) * radius));
 		pos.setY(closestY - (cos(angle) * radius));
-
-		velX *= .9999 * cos(angle);
-		velY *= .9999 * sin(angle);
+		
+		velX *= .9 * cos(angle);
+		velY *= .9 * sin(angle);
 	}
 }
 
@@ -112,11 +122,8 @@ Node::Node() {
 	velX = 0;
 	velY = 0;
 	mass = 5;
-	radius = 5;
+	radius = .5;
 }
-
-//Line class
-
 
 //Spring class
 Node Spring::getn1() {
@@ -160,6 +167,12 @@ void Spring::update() {
 		n2->applyForceY(-(n2->getVelY() - n1->getVelY()) * restitution);
 	}
 }
+void Spring::pointCollision(Point point) {
+	if (collision.circleVsLine({point.getX(), point.getY()}, 5, n1->getPos().getX(), n1->getPos().getY(), n2->getPos().getX(), n2->getPos().getY())) {
+		n1->lineCollision({ (int)n1->getPos().getX(), (int)n1->getPos().getY(), (int)n2->getPos().getX(), (int)n2->getPos().getY() });
+		n2->lineCollision({ (int)n1->getPos().getX(), (int)n1->getPos().getY(), (int)n2->getPos().getX(), (int)n2->getPos().getY() });
+	}
+}
 void Spring::draw(SDL_Renderer* renderer, SDL_Rect screen) {
 	SDL_RenderDrawLine(renderer, n1->getPos().getX() - screen.x, n1->getPos().getY() - screen.y, n2->getPos().getX() - screen.x, n2->getPos().getY() - screen.y);
 }
@@ -168,7 +181,7 @@ Spring::Spring() {
 	n1 = nullptr;
 	n2 = nullptr;
 	restitution = .002;
-	flexibility = .75;
+	flexibility = 2;
 	optimalLength = 0;
 	currentLength = 0;
 	maxLength = 0;
@@ -183,27 +196,33 @@ void SoftBody::fill() {
 		if (i.getPos().getY() < farTop) farTop = i.getPos().getY();
 		else if (i.getPos().getY() > farBottom) farBottom = i.getPos().getY();
 	}
+	int dist = 20;
+	std::vector<Node> newNodes;
+	Node newNode;
+	Point pos;
+	for (int i = 0; i <= ceil((farRight - farLeft) / dist); i++) {
+		for (int j = 0; j <= ceil((farBottom - farTop) / dist); j++) {
+			pos.setX(farLeft + dist * i);
+			pos.setY(farTop + dist * j);
+			newNode.setPos(pos);
+			newNodes.push_back(newNode);
+		}
+	}
 
 	int linesCollided = 0;
-	while (std::size(nodes) < 20) {
-		Node newNode;
-		Point pos;
-		newTimer.seedRand();
-		pos.setX((rand() % (farRight - farLeft)) + farLeft + 1);
-		pos.setY((rand() % (farBottom - farTop)) + farTop + 1);
-		for (unsigned int i = 0; i < std::size(nodes); i++) {
-			if (collision.lineVsLine(pos.getX(), pos.getY(), pos.getX(), farBottom + 1, nodes[i].getPos().getX(), nodes[i].getPos().getY(), nodes[(i + 1) % std::size(nodes)].getPos().getX(), nodes[(i + 1) % std::size(nodes)].getPos().getY())) linesCollided++;
+	for (auto& j : newNodes) {
+		for (int i = 0; i < std::size(nodes); i++) {
+			if (collision.lineVsLine(j.getPos().getX(), j.getPos().getY(), j.getPos().getX(), farBottom + 1, nodes[i].getPos().getX(), nodes[i].getPos().getY(), nodes[(i + 1) % std::size(nodes)].getPos().getX(), nodes[(i + 1) % std::size(nodes)].getPos().getY())) linesCollided++;
 		}
 		if (linesCollided % 2 == 1) {
-			newNode.setPos(pos);
-			nodes.push_back(newNode);
+			nodes.push_back(j);
 			linesCollided = 0;
 		}
 	}
 
 	for (unsigned int i = 0; i < std::size(nodes); i++) {
 		for (unsigned int j = 0; j < std::size(nodes); j++) {
-			if (collision.pointVsCircle(nodes[i].getPos(), nodes[j].getPos(), 70)) {
+			if (collision.pointVsCircle(nodes[i].getPos(), nodes[j].getPos(), 40)) {
 				Spring newSpring;
 				newSpring.setn1(&nodes[i]);
 				newSpring.setn2(&nodes[j]);
@@ -224,14 +243,14 @@ void SoftBody::drag(Point mPos) {
 		newSpring.update();
 	}
 }
-void SoftBody::update(double deltaTime, SDL_Rect level) {
+void SoftBody::update(double deltaTime) {
 	for (auto &i : nodes) {
 		i.update(deltaTime);
-		i.levelCollision(level);
-		i.lineCollision(200,400,600,200);
+		//i.lineCollision({ 200,400,600,200 });
 	}
 	for (auto &i : springs) {
 		i.update();
+		//i.pointCollision({ 600,200 });
 	}
 }
 void SoftBody::draw(SDL_Renderer* renderer, SDL_Rect screen) {
@@ -239,7 +258,7 @@ void SoftBody::draw(SDL_Renderer* renderer, SDL_Rect screen) {
 		i.draw(renderer, screen);
 	}
 	for (auto &i : nodes) {
-		i.draw(renderer, screen);
+		//i.draw(renderer, screen);
 	}
 }
 

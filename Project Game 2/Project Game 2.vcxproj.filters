@@ -39,6 +39,9 @@
     <ClInclude Include="..\player.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\level.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">
@@ -66,6 +69,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\level.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

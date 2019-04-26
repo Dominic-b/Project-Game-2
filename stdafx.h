@@ -8,10 +8,12 @@
 #include <stdio.h>//for printf and such
 #include <chrono>//for a timer / stopwatch
 #include <vector>
+#include <string>
 
 #include "menu.h"
 static Menu menu;
 #include "objects.h"
+#include "level.h"
 #include "player.h"
 #include "collision.h"
 static Collision collision;
